@@ -1395,12 +1395,10 @@ class Child(tk.Toplevel):
             if not field.get():
                 showinfo(title="Error", message="All fields must be filled with a value.")
                 return
-
         # Only one of them need to be filled
         if not m_f.get() and not v1_f.get():
             showinfo(title="Error", message="Either 'm_f' or 'v1_f' must be filled.")
             return
-        # If m is given, calculate v1
 
         try: # Check if the Values are numeric
             t1 = float(t1)
@@ -1416,6 +1414,7 @@ class Child(tk.Toplevel):
             showinfo(title="Error", message="The fields can only contain numeric values")
 
         else:
+            # If m is given, calculate v1
             if m:
                 # Calculate v1 with the ideal gas equation: pV = mRT, R = cp-cv
                 v1 = ((m/1000 * (cp - cv) * t1) / (p1 * 100000)) * 1000
