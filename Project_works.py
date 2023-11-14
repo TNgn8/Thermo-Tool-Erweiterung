@@ -1061,11 +1061,11 @@ class Child(tk.Toplevel):
         energy_balance.place(x=400, y=120)
 
         # Radiobuttons
-        rb_standard = tk.Radiobutton(self, text="Standard", variable=self.radio_selection,
+        rb_standard = tk.Radiobutton(self, text="Default (dry air)", variable=self.radio_selection,
                                      value=1, command=self.update_entries)
         rb_standard.place(x=400, y=160)
 
-        rb_selectable = tk.Radiobutton(self, text="Auswählbar", variable=self.radio_selection,
+        rb_selectable = tk.Radiobutton(self, text="Choose own values", variable=self.radio_selection,
                                        value=2, command=self.update_entries)
         rb_selectable.place(x=550, y=160)
 
@@ -1186,6 +1186,9 @@ class Child(tk.Toplevel):
                 w_f.configure(state=DISABLED)
                 s_f.configure(state=DISABLED)
                 h_f.configure(state=DISABLED)
+                m_f.delete(0, END)
+                m_f.configure(state=NORMAL)
+                v1_f.delete(0, END)
                 if combobox_f.current() == 2: # isobaric process
                     p2_f.configure(state=DISABLED)
                 else:
@@ -1199,6 +1202,9 @@ class Child(tk.Toplevel):
                 w_f.configure(state=DISABLED)
                 s_f.configure(state=DISABLED)
                 h_f.configure(state=DISABLED)
+                m_f.delete(0, END)
+                m_f.configure(state=DISABLED)
+                v1_f.delete(0, END)
                 if combobox_f.current() == 1: # isochoric
                     v2_f.configure(state=DISABLED)
                     w_f.configure(state=NORMAL)
@@ -1215,6 +1221,9 @@ class Child(tk.Toplevel):
                 w_f.configure(state=DISABLED)
                 s_f.configure(state=DISABLED)
                 h_f.configure(state=DISABLED)
+                m_f.delete(0, END)
+                m_f.configure(state=NORMAL)
+                v1_f.delete(0, END)
                 if combobox_f.current() == 0: # isothermal
                     t2_f.configure(state=DISABLED)
                     u_f.configure(state=DISABLED)
@@ -1231,6 +1240,9 @@ class Child(tk.Toplevel):
                 w_f.configure(state=DISABLED)
                 s_f.configure(state=DISABLED)
                 h_f.configure(state=DISABLED)
+                m_f.delete(0, END)
+                m_f.configure(state=NORMAL)
+                v1_f.delete(0, END)
                 if combobox_f.current() == 3: # adiabatic
                     q_f.configure(state=DISABLED)
                     s_f.configure(state=DISABLED)
@@ -1245,6 +1257,9 @@ class Child(tk.Toplevel):
                 w_f.configure(state=DISABLED)
                 s_f.configure(state=DISABLED)
                 h_f.configure(state=DISABLED)
+                m_f.delete(0, END)
+                m_f.configure(state=NORMAL)
+                v1_f.delete(0, END)
                 if combobox_f.current() == 0: # isothermal
                     u_f.configure(state=DISABLED)
                     h_f.configure(state=DISABLED)
@@ -1261,6 +1276,9 @@ class Child(tk.Toplevel):
                 u_f.configure(state=DISABLED)
                 s_f.configure(state=DISABLED)
                 h_f.configure(state=DISABLED)
+                m_f.delete(0, END)
+                m_f.configure(state=NORMAL)
+                v1_f.delete(0, END)
                 if combobox_f.current() == 1: # isochoric
                     w_f.configure(state=DISABLED)
                     v2_f.configure(state=DISABLED)
@@ -1275,6 +1293,9 @@ class Child(tk.Toplevel):
                 u_f.configure(state=DISABLED)
                 w_f.configure(state=DISABLED)
                 h_f.configure(state=DISABLED)
+                m_f.delete(0, END)
+                m_f.configure(state=NORMAL)
+                v1_f.delete(0, END)
                 if combobox_f.current() == 3: # adiabatic
                     s_f.configure(state=DISABLED)
                     q_f.configure(state=DISABLED)
@@ -1289,6 +1310,9 @@ class Child(tk.Toplevel):
                 u_f.configure(state=DISABLED)
                 w_f.configure(state=DISABLED)
                 s_f.configure(state=DISABLED)
+                m_f.delete(0, END)
+                m_f.configure(state=NORMAL)
+                v1_f.delete(0, END)
                 if combobox_f.current() == 0: # isothermal
                     u_f.configure(state=DISABLED)
                     h_f.configure(state=DISABLED)
@@ -1316,12 +1340,13 @@ class Child(tk.Toplevel):
         self.clear_button.place(x=400, y=280)  # Adjust the x and y coordinates as needed
 
     def clear_inputs(self):
-    # Clear the contents of the Entry widgets
+    # Clear the contents of the Entry widgets cp, cv und k
         self.k_f.delete(0, tk.END)
         self.cp_f.delete(0, tk.END)
         self.cv_f.delete(0, tk.END)
 
     def update_entries(self):
+    # Bind the entry widgets of cp, cv und k to the entry Widgets
         if self.radio_selection.get() == 1:
             # Assuming cp_f and cv_f are the names of your Entry widgets
             self.cp_f.delete(0, END)
@@ -1338,7 +1363,7 @@ class Child(tk.Toplevel):
             self.calculate()
 
     def calculate(self):
-        # Only proceed if 'Auswählbar' is selected
+        # Only proceed if Radiobutton 'Choose own Value' is selected
         if self.radio_selection.get() == 2:
             # Cancel any existing scheduled call
             if self._after_id is not None:
@@ -1406,7 +1431,7 @@ class Child(tk.Toplevel):
             cp = float(cp)
             cv = float(cv)
             k = float(k)
-            # Für die optionalen Felder, setze None, falls sie leer sind
+            # optionale Entrys
             m = float(m) if m else None
             v1 = float(v1) if v1 else None
 
@@ -1425,6 +1450,7 @@ class Child(tk.Toplevel):
             else:
                 # If m is not given
                 v1 = float(v1)
+
             if combobox_f.current() == 0: #isothertmal
 
                 if changed_variable_f.current() == 0: #pressure will be changed/input
