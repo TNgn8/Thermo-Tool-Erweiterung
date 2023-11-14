@@ -1086,6 +1086,33 @@ class Child(tk.Toplevel):
         m_f = Entry(self)
         m_f.place(x=50, y=290)
 
+        # Code to disable either m_f or v1_f, depending on which one receives input first
+        # StringVars for the Entry widgets
+        m_f_var = tk.StringVar()
+        v1_f_var = tk.StringVar()
+
+        # Configure Entry widgets to use StringVars
+        m_f.configure(textvariable=m_f_var)
+        v1_f.configure(textvariable=v1_f_var)
+
+        # Define the callback functions
+        def m_f_callback(*args):
+            if m_f_var.get():
+                v1_f.configure(state='disabled')
+            else:
+                v1_f.configure(state='normal')
+
+        def v1_f_callback(*args):
+            if v1_f_var.get():
+                m_f.configure(state='disabled')
+            else:
+                m_f.configure(state='normal')
+
+        # Trace the variables
+        m_f_var.trace('w', m_f_callback)
+        v1_f_var.trace('w', v1_f_callback)
+
+
         # cp, cv, κ Entry
         self.cp_f = Entry(self)
         self.cp_f.place(x=400, y=210)
@@ -1108,10 +1135,14 @@ class Child(tk.Toplevel):
         self.k_f.configure(textvariable=self.k_f_var)
         self.k_f_var.trace("w", lambda name, index, mode, sv=self.k_f_var: self.calculate())
 
-        # Set default values for cp, cv, and k
+        # Set default values for cp, cv, and k, and disable the entry Widgets
         self.cp_f.insert(0, '1004')
         self.cv_f.insert(0, '717')
         self.k_f.insert(0, '1.4')
+        self.cp_f.configure(state=DISABLED)
+        self.cv_f.configure(state=DISABLED)
+        self.k_f.configure(state=DISABLED)
+
 
         # Heat transfer = q, Internal Energy = u, Thermodynamic work = w, Enthalpy = h, Entropy = s
         q_f = Entry(self)
@@ -1348,15 +1379,20 @@ class Child(tk.Toplevel):
     def update_entries(self):
     # Bind the entry widgets of cp, cv und k to the entry Widgets
         if self.radio_selection.get() == 1:
-            # Assuming cp_f and cv_f are the names of your Entry widgets
             self.cp_f.delete(0, END)
             self.cp_f.insert(0, "1005")
             self.cv_f.delete(0, END)
             self.cv_f.insert(0, "718")
             self.k_f.delete(0, END)
             self.k_f.insert(0, "1.4")
+            self.cp_f.configure(state=DISABLED)
+            self.cv_f.configure(state=DISABLED)
+            self.k_f.configure(state=DISABLED)
+
         elif self.radio_selection.get() == 2:
-            # Clear the entries or handle the 'Auswählbar' selection differently
+            self.cp_f.configure(state=NORMAL)
+            self.cv_f.configure(state=NORMAL)
+            self.k_f.configure(state=NORMAL)
             self.cp_f.delete(0, END)
             self.cv_f.delete(0, END)
             self.k_f.delete(0, END)
@@ -1400,7 +1436,6 @@ class Child(tk.Toplevel):
                     self.cp_f.delete(0, tk.END)
                     self.cp_f.insert(0, round(cp, 2))
             except ValueError:
-                # If one of the values is not convertible to float, do nothing (might mean the field is empty).
                 pass
 
 
@@ -1456,7 +1491,7 @@ class Child(tk.Toplevel):
                 if changed_variable_f.current() == 0: #pressure will be changed/input
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t1))
+                    t2_f.insert(0, round(t1, 2))
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
                     u_f.insert(0,0)
@@ -1472,7 +1507,7 @@ class Child(tk.Toplevel):
                         v2 = p1 * v1 / p2
                         v2_f.configure(state=NORMAL)
                         v2_f.delete(0, END)
-                        v2_f.insert(0, round(v2,2))
+                        v2_f.insert(0, round(v2, 2))
                         q= (cp-cv) * t1 * math.log(v2/v1)/1000
                         q_f.configure(state=NORMAL)
                         q_f.delete(0, END)
@@ -1488,7 +1523,7 @@ class Child(tk.Toplevel):
                 elif changed_variable_f.current() == 1: # volume will be changed
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t1))
+                    t2_f.insert(0, round(t1, 2))
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
                     u_f.insert(0,0)
@@ -1522,7 +1557,7 @@ class Child(tk.Toplevel):
                 elif changed_variable_f.current() == 3: #heat transfer will be changed/input
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t1))
+                    t2_f.insert(0, round(t1, 2))
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
                     u_f.insert(0,0)
@@ -1539,10 +1574,10 @@ class Child(tk.Toplevel):
                         p2 = p1*v1/v2
                         v2_f.configure(state=NORMAL)
                         v2_f.delete(0, END)
-                        v2_f.insert(0, round(v2,2))
+                        v2_f.insert(0, round(v2, 2))
                         p2_f.configure(state=NORMAL)
                         p2_f.delete(0, END)
-                        p2_f.insert(0, round(p2,2))
+                        p2_f.insert(0, round(p2, 2))
                         w = -(cp-cv) * t1 * math.log(v2 / v1) / 1000
                         w_f.configure(state=NORMAL)
                         w_f.delete(0, END)
@@ -1636,7 +1671,7 @@ class Child(tk.Toplevel):
                     t2 = p2 * t1 / p1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     q = cv * (t2-t1) / 1000
                     q_f.configure(state=NORMAL)
                     q_f.delete(0, END)
@@ -1702,11 +1737,11 @@ class Child(tk.Toplevel):
                     t2=q*1000/cv+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     p2 = p1 * t2 / t1
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
-                    p2_f.insert(0, round(p2,2))
+                    p2_f.insert(0, round(p2, 2))
                     u = cv * (t2 - t1) / 1000
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
@@ -1734,11 +1769,11 @@ class Child(tk.Toplevel):
                     t2=u*1000/cv+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     p2 = p1 * t2 / t1
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
-                    p2_f.insert(0, round(p2,2))
+                    p2_f.insert(0, round(p2, 2))
                     q = cv * (t2 - t1) / 1000
                     q_f.configure(state=NORMAL)
                     q_f.delete(0, END)
@@ -1768,11 +1803,11 @@ class Child(tk.Toplevel):
                     t2=t1*math.exp(s/cv)
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     p2 = p1 * t2 / t1
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
-                    p2_f.insert(0, round(p2,2))
+                    p2_f.insert(0, round(p2, ))
                     q = cv * (t2 - t1) / 1000
                     q_f.configure(state=NORMAL)
                     q_f.delete(0, END)
@@ -1800,11 +1835,11 @@ class Child(tk.Toplevel):
                     t2=h*1000/cp+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     p2 = p1 * t2 / t1
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
-                    p2_f.insert(0, round(p2,2))
+                    p2_f.insert(0, round(p2, 2))
                     q = cv * (t2 - t1) / 1000
                     q_f.configure(state=NORMAL)
                     q_f.delete(0, END)
@@ -1833,7 +1868,7 @@ class Child(tk.Toplevel):
                     t2 = v2 * t1 / v1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     q = cp*(t2-t1)/1000
                     q_f.configure(state=NORMAL)
                     q_f.delete(0, END)
@@ -1854,7 +1889,7 @@ class Child(tk.Toplevel):
 
                     w_f.configure(state=NORMAL)
                     w_f.delete(0, END)
-                    w_f.insert(0, round(w,2))
+                    w_f.insert(0, round(w, 2))
                 elif changed_variable_f.current() == 2: # temperature will be changed
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
@@ -1867,7 +1902,7 @@ class Child(tk.Toplevel):
                     v2 = t2 * v1 / t1
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
-                    v2_f.insert(0, round(v2,2))
+                    v2_f.insert(0, round(v2, 2))
                     q = cp*(t2-t1)/1000
                     q_f.configure(state=NORMAL)
                     q_f.delete(0, END)
@@ -1891,7 +1926,7 @@ class Child(tk.Toplevel):
 
                     w_f.configure(state=NORMAL)
                     w_f.delete(0, END)
-                    w_f.insert(0, round(w, 2))
+                    w_f.insert(0, round(w))
                 elif changed_variable_f.current() == 3: # heat transfer will be changed
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
@@ -1904,11 +1939,11 @@ class Child(tk.Toplevel):
                     t2 = q*1000/cp+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     v2=t2*v1/t1
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
-                    v2_f.insert(0, round(v2,2))
+                    v2_f.insert(0, round(v2, 2))
                     u = cv*(t2-t1)/1000
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
@@ -1925,7 +1960,7 @@ class Child(tk.Toplevel):
 
                     w_f.configure(state=NORMAL)
                     w_f.delete(0, END)
-                    w_f.insert(0, round(w, 2))
+                    w_f.insert(0, round(w))
                 elif changed_variable_f.current() == 4: # internal energy will be changed
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
@@ -1938,7 +1973,7 @@ class Child(tk.Toplevel):
                     t2 =u*1000/cv+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     v2 = t2 * v1 / t1
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
@@ -1958,7 +1993,7 @@ class Child(tk.Toplevel):
                     w = -(v2 - v1) * 8.314 * t1 / v1 / (28.96 / 1000) / 1000  # M=28.96/1000 kg/mol; r=8.314
                     w_f.configure(state=NORMAL)
                     w_f.delete(0, END)
-                    w_f.insert(0, round(w, 2))
+                    w_f.insert(0, round(w))
                 elif changed_variable_f.current() == 5: # t.work will be changed
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
@@ -1977,7 +2012,7 @@ class Child(tk.Toplevel):
                     t2 = t1 * v2 / v1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     q = cp*(t2-t1)/1000
                     q_f.configure(state=NORMAL)
                     q_f.delete(0, END)
@@ -2006,7 +2041,7 @@ class Child(tk.Toplevel):
                     t2 = t1*math.exp(s/cp)
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     v2 = t2 * v1 / t1
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
@@ -2027,7 +2062,7 @@ class Child(tk.Toplevel):
 
                     w_f.configure(state=NORMAL)
                     w_f.delete(0, END)
-                    w_f.insert(0, round(w, 2))
+                    w_f.insert(0, round(w))
                 elif changed_variable_f.current() == 7: # enthalpy will be changed
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
@@ -2040,7 +2075,7 @@ class Child(tk.Toplevel):
                     t2 = h*1000/cp+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     v2 = t2 * v1 / t1
 
                     v2_f.configure(state=NORMAL)
@@ -2063,7 +2098,7 @@ class Child(tk.Toplevel):
 
                     w_f.configure(state=NORMAL)
                     w_f.delete(0, END)
-                    w_f.insert(0, round(w, 2))
+                    w_f.insert(0, round(w))
 
 
             elif combobox_f.current() == 3: # adiabatic
@@ -2082,11 +2117,11 @@ class Child(tk.Toplevel):
                     v2 = v1 * (p1 / p2) ** (1 / k)
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
-                    v2_f.insert(0, round(v2,2))
+                    v2_f.insert(0, round(v2, 2))
                     t2 = t1 * (p2 / p1) ** ((k - 1) / k)
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     u = cv * (t2 - t1) / 1000
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
@@ -2146,11 +2181,11 @@ class Child(tk.Toplevel):
                     p2 = p1 * (t2 / t1) ** (k / (k - 1))
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
-                    p2_f.insert(0, round(p2,2))
+                    p2_f.insert(0, round(p2, 2))
                     v2 = v1 * (t1 / t2) ** (1 / (k - 1))
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
-                    v2_f.insert(0, round(v2,2))
+                    v2_f.insert(0, round(v2, 2))
                     u = cv * (t2 - t1) / 1000
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
@@ -2181,15 +2216,15 @@ class Child(tk.Toplevel):
                     t2=u*1000/cv+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     p2 = p1 * (t2 / t1) ** (k / (k - 1))
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
-                    p2_f.insert(0, round(p2,2))
+                    p2_f.insert(0, round(p2, 2))
                     v2 = v1 * (t1 / t2) ** (1 / (k - 1))
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
-                    v2_f.insert(0, round(v2,2))
+                    v2_f.insert(0, round(v2, 2))
                     w = cv * (t2 - t1) / 1000
                     w_f.configure(state=NORMAL)
                     w_f.delete(0, END)
@@ -2213,15 +2248,15 @@ class Child(tk.Toplevel):
                     t2=w*1000/cv+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     p2 = p1 * (t2 / t1) ** (k / (k - 1))
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
-                    p2_f.insert(0, round(p2,2))
+                    p2_f.insert(0, round(p2, 2))
                     v2 = v1 * (t1 / t2) ** (1 / (k - 1))
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
-                    v2_f.insert(0, round(v2,2))
+                    v2_f.insert(0, round(v2, 2))
                     u = cv * (t2 - t1) / 1000
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
@@ -2248,15 +2283,15 @@ class Child(tk.Toplevel):
                     t2=h*1000/cp+t1
                     t2_f.configure(state=NORMAL)
                     t2_f.delete(0, END)
-                    t2_f.insert(0, round(t2))
+                    t2_f.insert(0, round(t2, 2))
                     p2 = p1 * (t2 / t1) ** (k / (k - 1))
                     p2_f.configure(state=NORMAL)
                     p2_f.delete(0, END)
-                    p2_f.insert(0, round(p2,2))
+                    p2_f.insert(0, round(p2, 2))
                     v2 = v1 * (t1 / t2) ** (1 / (k - 1))
                     v2_f.configure(state=NORMAL)
                     v2_f.delete(0, END)
-                    v2_f.insert(0, round(v2,2))
+                    v2_f.insert(0, round(v2, 2))
                     u = cv * (t2 - t1) / 1000
                     u_f.configure(state=NORMAL)
                     u_f.delete(0, END)
