@@ -1023,13 +1023,15 @@ class Child(tk.Toplevel):
         heading_label = Label(self, text="Temperature (K)", font="Pt  11 bold", fg="#443A32", bg='#DFE0DF')
         heading_label.place(x=200, y=230)
 
-        #Labels for cp,cv,k
+        #Labels for cp,cv,k,R
         heading_label = Label(self, text="Cp (J/kgK)", font="Pt  11 bold", fg="#443A32", bg='#DFE0DF')
         heading_label.place(x=400, y=190)
         heading_label = Label(self, text="k", font="Pt  11 bold", fg="#443A32", bg='#DFE0DF')
         heading_label.place(x=400, y=230)
         heading_label = Label(self, text="Cv (J/kg)", font="Pt  11 bold", fg="#443A32", bg='#DFE0DF')
         heading_label.place(x=550, y=190)
+        heading_label = Label(self, text="R (J/KgK)", font="Pt  11 bold", fg="#443A32", bg='#DFE0DF')
+        heading_label.place(x=550, y=230)
 
         # Labels for Combobox
         heading_label = Label(self, text="CHOOSE GAS PROCESS:",font="Cambria 13 bold", fg="#005B47", bg='#DFE0DF')
@@ -1120,6 +1122,8 @@ class Child(tk.Toplevel):
         self.k_f.place(x=400, y=250)
         self.cv_f = Entry(self)
         self.cv_f.place(x=550, y=210)
+        self.R_f = Entry(self)
+        self.R_f.place(x=550, y=250)
 
         # Add trace methods to Entry widgets
         self.cp_f_var = tk.StringVar()
@@ -1135,13 +1139,19 @@ class Child(tk.Toplevel):
         self.k_f.configure(textvariable=self.k_f_var)
         self.k_f_var.trace("w", lambda name, index, mode, sv=self.k_f_var: self.calculate())
 
+        self.R_f_var = tk.StringVar()
+        self.R_f.configure(textvariable=self.R_f_var)
+        self.R_f_var.trace("w", lambda name, index, mode, sv=self.R_f_var: self.calculate())
+
         # Set default values for cp, cv, and k, and disable the entry Widgets
         self.cp_f.insert(0, '1004')
         self.cv_f.insert(0, '717')
         self.k_f.insert(0, '1.4')
+        self.R_f.insert(0, '287')
         self.cp_f.configure(state=DISABLED)
         self.cv_f.configure(state=DISABLED)
         self.k_f.configure(state=DISABLED)
+        self.R_f.configure(state=DISABLED)
 
 
         # Heat transfer = q, Internal Energy = u, Thermodynamic work = w, Enthalpy = h, Entropy = s
@@ -1375,6 +1385,7 @@ class Child(tk.Toplevel):
         self.k_f.delete(0, tk.END)
         self.cp_f.delete(0, tk.END)
         self.cv_f.delete(0, tk.END)
+        self.R_f.delete(0, tk.END)
 
     def update_entries(self):
     # Bind the entry widgets of cp, cv und k to the entry Widgets
@@ -1385,17 +1396,22 @@ class Child(tk.Toplevel):
             self.cv_f.insert(0, "718")
             self.k_f.delete(0, END)
             self.k_f.insert(0, "1.4")
+            self.R_f.delete(0, END)
+            self.R_f.insert(0, "287")
             self.cp_f.configure(state=DISABLED)
             self.cv_f.configure(state=DISABLED)
             self.k_f.configure(state=DISABLED)
+            self.R_f.configure(state=DISABLED)
 
         elif self.radio_selection.get() == 2:
             self.cp_f.configure(state=NORMAL)
             self.cv_f.configure(state=NORMAL)
             self.k_f.configure(state=NORMAL)
+            self.R_f.configure(state=NORMAL)
             self.cp_f.delete(0, END)
             self.cv_f.delete(0, END)
             self.k_f.delete(0, END)
+            self.R_f.delete(0, END)
             self.calculate()
 
     def calculate(self):
@@ -1412,7 +1428,7 @@ class Child(tk.Toplevel):
             # calculations
             try:
                 # Initialize values as None
-                cp, cv, k = (None, None, None)
+                cp, cv, k, R = (None, None, None, None)
 
                 # Try to get the values if they have been input
                 if self.cp_f.get():
@@ -1421,22 +1437,54 @@ class Child(tk.Toplevel):
                     cv = float(self.cv_f.get())
                 if self.k_f.get():
                     k = float(self.k_f.get())
+                if self.R_f.get():
+                    R =float(self.R_f.get())
 
                 # Calculate missing values if possible
                 if cp is not None and cv is not None:
                     k = cp / cv
+                    R = cp - cv
                     self.k_f.delete(0, tk.END)
                     self.k_f.insert(0, round(k, 2))
+                    self.R_f.delete(0, tk.END)
+                    self.R_f.insert(0, round(R, 2))
                 elif k is not None and cp is not None:
                     cv = cp / k
+                    R = cp - cv
                     self.cv_f.delete(0, tk.END)
                     self.cv_f.insert(0, round(cv, 2))
+                    self.R_f.delete(0, tk.END)
+                    self.R_f.insert(0, round(R, 2))
                 elif k is not None and cv is not None:
                     cp = cv * k
+                    R = cp - cv
+                    self.cp_f.delete(0, tk.END)
+                    self.cp_f.insert(0, round(cp, 2))
+                    self.R_f.delete(0, tk.END)
+                    self.R_f.insert(0, round(R, 2))
+                elif R is not None and cv is not None:
+                    cp = R + cv
+                    k = cp/cv
+                    self.cp_f.delete(0, tk.END)
+                    self.cp_f.insert(0, round(cp, 2))
+                    self.k_f.delete(0, tk.END)
+                    self.k_f.insert(0, round(k, 2))
+                elif R is not None and cp is not None:
+                    cv = cp - R
+                    k = cp/cv
+                    self.cv_f.delete(0, tk.END)
+                    self.cv_f.insert(0, round(cv, 2))
+                    self.k_f.delete(0, tk.END)
+                    self.k_f.insert(0, round(k, 2))
+                elif R is not None and k is not None:
+                    cv = R/(k-1)
+                    cp = R + cv
+                    self.cv_f.delete(0, tk.END)
+                    self.cv_f.insert(0, round(cv, 2))
                     self.cp_f.delete(0, tk.END)
                     self.cp_f.insert(0, round(cp, 2))
             except ValueError:
-                pass
+                        pass
 
 
     def input_keyboard(self, p1_f, v1_f, t1_f, p2_f, v2_f, t2_f, m_f, q_f, u_f, w_f, h_f, s_f, combobox_f, changed_variable_f):
@@ -1448,8 +1496,9 @@ class Child(tk.Toplevel):
         cp = self.cp_f.get()
         cv = self.cv_f.get()
         k = self.k_f.get()
+        R = self.R_f.get()
         # Create a List of what need to be checked
-        fields_to_check = [t1_f, p1_f, self.cp_f, self.cv_f, self.k_f]
+        fields_to_check = [t1_f, p1_f, self.cp_f, self.cv_f, self.k_f, self.R_f]
         # Checking if these fields are filled
         for field in fields_to_check:
             if not field.get():
@@ -1466,6 +1515,7 @@ class Child(tk.Toplevel):
             cp = float(cp)
             cv = float(cv)
             k = float(k)
+            R = float(R)
             # optionale Entrys
             m = float(m) if m else None
             v1 = float(v1) if v1 else None
@@ -1477,14 +1527,14 @@ class Child(tk.Toplevel):
             # If m is given, calculate v1
             if m:
                 # Calculate v1 with the ideal gas equation: pV = mRT, R = cp-cv
-                v1 = ((m/1000 * (cp - cv) * t1) / (p1 * 100000)) * 1000
+                v1 = ((m/1000 * R * t1) / (p1 * 100000)) * 1000
                 v1_f.configure(state=NORMAL)
                 v1_f.delete(0, END)
                 v1_f.insert(0, round(v1, 2))
             else:
                 # If m is not given
                 v1 = float(v1)
-                m = (p1*100000*v1/((cp-cv)*t1))
+                m = (p1*100000*v1/(R*t1))
                 m_f.configure(state=NORMAL)
                 m_f.delete(0, END)
                 m_f.insert(0, round(m, 2))
@@ -1511,15 +1561,15 @@ class Child(tk.Toplevel):
                         v2_f.configure(state=NORMAL)
                         v2_f.delete(0, END)
                         v2_f.insert(0, round(v2, 2))
-                        q= (cp-cv) * t1 * math.log(v2/v1)/1000
+                        q= R * t1 * math.log(v2/v1)/1000
                         q_f.configure(state=NORMAL)
                         q_f.delete(0, END)
                         q_f.insert(0, round(q))
-                        w = -(cp-cv) * t1 * math.log(v2 / v1) / 1000
+                        w = -R * t1 * math.log(v2 / v1) / 1000
                         w_f.configure(state=NORMAL)
                         w_f.delete(0, END)
                         w_f.insert(0, round(w))
-                        s = (cp-cv) * math.log(v2 / v1)
+                        s = R * math.log(v2 / v1)
                         s_f.configure(state=NORMAL)
                         s_f.delete(0, END)
                         s_f.insert(0, round(s))
@@ -1543,15 +1593,15 @@ class Child(tk.Toplevel):
                         p2_f.configure(state=NORMAL)
                         p2_f.delete(0, END)
                         p2_f.insert(0, round(p2, 2))
-                        q = (cp-cv) * t1 * math.log(v2 / v1) / 1000
+                        q = R * t1 * math.log(v2 / v1) / 1000
                         q_f.configure(state=NORMAL)
                         q_f.delete(0, END)
                         q_f.insert(0, round(q))
-                        w = -(cp-cv) * t1 * math.log(v2 / v1) / 1000
+                        w = -R * t1 * math.log(v2 / v1) / 1000
                         w_f.configure(state=NORMAL)
                         w_f.delete(0, END)
                         w_f.insert(0, round(w))
-                        s = (cp-cv) * math.log(v2 / v1)
+                        s = R * math.log(v2 / v1)
                         s_f.configure(state=NORMAL)
                         s_f.delete(0, END)
                         s_f.insert(0, round(s))
@@ -1573,7 +1623,7 @@ class Child(tk.Toplevel):
                        showinfo(title="Error", message="The fields can only contain numeric values")
                     else:
                         q = float(q_f.get())
-                        v2=v1*math.exp(q*1000/((cp-cv)*t1))
+                        v2=v1*math.exp(q*1000/(R*t1))
                         p2 = p1*v1/v2
                         v2_f.configure(state=NORMAL)
                         v2_f.delete(0, END)
@@ -1581,11 +1631,11 @@ class Child(tk.Toplevel):
                         p2_f.configure(state=NORMAL)
                         p2_f.delete(0, END)
                         p2_f.insert(0, round(p2, 2))
-                        w = -(cp-cv) * t1 * math.log(v2 / v1) / 1000
+                        w = -R * t1 * math.log(v2 / v1) / 1000
                         w_f.configure(state=NORMAL)
                         w_f.delete(0, END)
                         w_f.insert(0, round(w))
-                        s = (cp-cv) * math.log(v2 / v1)
+                        s = R * math.log(v2 / v1)
                         s_f.configure(state=NORMAL)
                         s_f.delete(0, END)
                         s_f.insert(0, round(s))
@@ -1607,7 +1657,7 @@ class Child(tk.Toplevel):
                        showinfo(title="Error", message="The fields can only contain numeric values")
                     else:
                         w = float(w_f.get())
-                        v2=v1*math.exp((-1)*w*1000/((cp-cv)*t1))
+                        v2=v1*math.exp((-1)*w*1000/(R*t1))
                         p2 = p1*v1/v2
                         p2_f.configure(state=NORMAL)
                         p2_f.delete(0, END)
@@ -1615,11 +1665,11 @@ class Child(tk.Toplevel):
                         v2_f.configure(state=NORMAL)
                         v2_f.delete(0, END)
                         v2_f.insert(0, round(v2, 2))
-                        q = (cp-cv) * t1 * math.log(v2 / v1) / 1000
+                        q = R * t1 * math.log(v2 / v1) / 1000
                         q_f.configure(state=NORMAL)
                         q_f.delete(0, END)
                         q_f.insert(0, round(q))
-                        s = (cp-cv) * math.log(v2 / v1)
+                        s = R * math.log(v2 / v1)
                         s_f.configure(state=NORMAL)
                         s_f.delete(0, END)
                         s_f.insert(0, round(s))
@@ -1639,7 +1689,7 @@ class Child(tk.Toplevel):
                        showinfo(title="Error", message="The fields can only contain numeric values")
                     else:
                         s = float(s_f.get())
-                        v2=v1*math.exp(s/(cp-cv))
+                        v2=v1*math.exp(s/R)
                         p2 = p1*v1/v2
                         p2_f.configure(state=NORMAL)
                         p2_f.delete(0, END)
@@ -1647,11 +1697,11 @@ class Child(tk.Toplevel):
                         v2_f.configure(state=NORMAL)
                         v2_f.delete(0, END)
                         v2_f.insert(0, round(v2, 2))
-                        q = (cp-cv) * t1 * math.log(v2 / v1) / 1000
+                        q = R * t1 * math.log(v2 / v1) / 1000
                         q_f.configure(state=NORMAL)
                         q_f.delete(0, END)
                         q_f.insert(0, round(q))
-                        w = -(cp-cv) * t1 * math.log(v2 / v1) / 1000
+                        w = -R * t1 * math.log(v2 / v1) / 1000
                         w_f.configure(state=NORMAL)
                         w_f.delete(0, END)
                         w_f.insert(0, round(w))
