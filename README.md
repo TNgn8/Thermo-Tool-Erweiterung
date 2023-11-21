@@ -8,3 +8,4 @@ Die ganzen Dateien, inklusive Source-Code und Exe-Datei, können Sie [hier](http
 Die Anwendung (EXE-Datei) befindet sich im Ordner "dist", unter dem Namen "Project_works".
 Die alte Anwendung ist ebenfalls im Ordner "dist", unter dem Namen "Project".
 
+Lizenz [hier](https://github.com/TNgn8/Thermo-Tool-Erweiterung/blob/master/LICENSE)
